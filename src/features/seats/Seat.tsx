@@ -14,6 +14,7 @@ interface Props {
   now: Date;
   me: string;
   loaded: boolean;
+  failed: boolean;
   onClaim: (accountId: string) => void;
   onExtend: (booking: Booking) => void;
   onEnd: (booking: Booking) => void;
@@ -26,7 +27,7 @@ const swap = {
   transition: { duration: 0.28 },
 };
 
-export function Seat({ account, tone, bookings, now, me, loaded, onClaim, onExtend, onEnd }: Props) {
+export function Seat({ account, tone, bookings, now, me, loaded, failed, onClaim, onExtend, onEnd }: Props) {
   const [warning, setWarning] = useState(false);
   const active = currentBooking(account.id, now, bookings);
   const upcoming = nextBooking(account.id, now, bookings);
@@ -62,7 +63,7 @@ export function Seat({ account, tone, bookings, now, me, loaded, onClaim, onExte
             {active ? 'In use' : 'Available'}
           </span>
         ) : (
-          <span className="pill pill-unknown"><i />Checking</span>
+          <span className="pill pill-unknown"><i />{failed ? 'Unknown' : 'Checking'}</span>
         )}
       </header>
 
@@ -70,8 +71,8 @@ export function Seat({ account, tone, bookings, now, me, loaded, onClaim, onExte
         <AnimatePresence mode="wait" initial={false}>
           {!loaded ? (
             <motion.div key="unknown" className="status-copy" {...swap}>
-              <p className="status-name unknown-word">Checking…</p>
-              <p className="status-detail">Looking up who's on this login</p>
+              <p className={`status-name unknown-word ${failed ? 'still' : ''}`}>{failed ? 'Unknown' : 'Checking…'}</p>
+              <p className="status-detail">{failed ? "Can't tell who's on this login right now" : "Looking up who's on this login"}</p>
             </motion.div>
           ) : active ? (
             <motion.div key={active.id} className="status-row" {...swap}>

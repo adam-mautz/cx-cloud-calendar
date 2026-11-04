@@ -109,8 +109,11 @@ export function Board({ vault, store, onLock }: Props) {
   const held = accounts.map((account) => currentBooking(account.id, now, bookings));
   const free = accounts.filter((_, index) => !held[index]);
   const soonest = held.filter((item): item is Booking => Boolean(item)).sort((a, b) => Date.parse(a.end) - Date.parse(b.end))[0];
+  const failed = sync === 'denied' || sync === 'offline';
   const headline = !loaded
-    ? "Checking who's on…"
+    ? failed
+      ? "Can't check availability right now."
+      : "Checking who's on…"
     : free.length === accounts.length
       ? 'Both logins are free.'
       : free.length > 0
@@ -157,6 +160,7 @@ export function Board({ vault, store, onLock }: Props) {
               now={now}
               me={me}
               loaded={loaded}
+              failed={failed}
               onClaim={(accountId) => setPrefill({ accountId, now: true })}
               onExtend={extend}
               onEnd={setDetails}

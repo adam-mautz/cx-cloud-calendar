@@ -192,6 +192,7 @@ select.input option { background: var(--ink-800); color: var(--cream); }
 .status-name { font-size: clamp(44px, 6vw, 76px); font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; overflow-wrap: anywhere; }
 .free-word { color: var(--mint); }
 .unknown-word { color: var(--mist); font-size: clamp(34px, 4.4vw, 56px); animation: fade-pulse 1.6s ease-in-out infinite; }
+.unknown-word.still { animation: none; }
 @keyframes fade-pulse { 50% { opacity: 0.45; } }
 .status-detail { margin-top: 8px; font-size: 17px; font-weight: 600; color: var(--sand); }
 .status-sub { color: var(--mist); }
