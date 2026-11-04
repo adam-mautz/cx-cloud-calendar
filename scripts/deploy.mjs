@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
-const REMOTE = 'https://github.com/adam-mautz/hot-seat.git';
+const REMOTE = 'https://github.com/adam-mautz/cx-cloud-calendar.git';
 const WORK = '.deploy';
 const run = (command, cwd = '.') => execSync(command, { cwd, stdio: 'inherit' });
 const quiet = (command, cwd = '.') => execSync(command, { cwd, stdio: 'pipe' }).toString().trim();
@@ -34,9 +34,9 @@ cpSync('dist', WORK, { recursive: true });
 
 run('git add -A', WORK);
 if (quiet('git status --porcelain', WORK)) {
-  run('git -c user.name="hot-seat deploy" -c user.email="deploy@users.noreply.github.com" commit -q -m "Deploy site"', WORK);
+  run('git -c user.name="cx-cloud-calendar deploy" -c user.email="deploy@users.noreply.github.com" commit -q -m "Deploy site"', WORK);
   run('git push -q origin gh-pages', WORK);
-  console.log('\n✓ Deployed. The site updates in about a minute: https://adam-mautz.github.io/hot-seat/\n');
+  console.log('\n✓ Deployed. The site updates in about a minute: https://adam-mautz.github.io/cx-cloud-calendar/\n');
 } else {
   console.log('\nNothing changed, so there was nothing to deploy.\n');
 }

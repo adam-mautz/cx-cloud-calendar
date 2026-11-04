@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Served from https://adam-mautz.github.io/hot-seat/
+// Served from https://adam-mautz.github.io/cx-cloud-calendar/
 export default defineConfig({
-  base: '/hot-seat/',
+  base: '/cx-cloud-calendar/',
   plugins: [react()],
 });
