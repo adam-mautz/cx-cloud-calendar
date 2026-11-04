@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+*.local
+# Holds plaintext logins and the GitHub token. Never commit.
+vault.local.json
+.deploy

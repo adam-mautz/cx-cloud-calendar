@@ -1,0 +1,14 @@
+{
+  "people": ["Person One", "Person Two"],
+  "accounts": [
+    { "id": "user-1", "label": "User 1", "username": "", "password": "", "loginUrl": "" },
+    { "id": "user-2", "label": "User 2", "username": "", "password": "", "loginUrl": "" }
+  ],
+  "data": {
+    "owner": "adam-mautz",
+    "repo": "hot-seat-data",
+    "branch": "main",
+    "path": "bookings.json",
+    "token": ""
+  }
+}
