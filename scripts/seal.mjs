@@ -16,18 +16,23 @@ function fail(message) {
   process.exit(1);
 }
 
-function askHidden(prompt) {
-  return new Promise((resolve) => {
-    const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-    rl._writeToOutput = (text) => {
-      if (text.includes(prompt)) rl.output.write(prompt);
-    };
-    rl.question(prompt, (answer) => {
-      rl.close();
-      process.stdout.write('\n');
-      resolve(answer);
+function createAsker() {
+  const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+  let muted = false;
+  rl._writeToOutput = (text) => {
+    if (!muted) rl.output.write(text);
+  };
+  const ask = (prompt) =>
+    new Promise((resolve) => {
+      muted = false;
+      rl.question(prompt, (answer) => {
+        muted = false;
+        rl.output.write('\n');
+        resolve(answer);
+      });
+      muted = true;
     });
-  });
+  return { ask, close: () => rl.close() };
 }
 
 function check(vault) {
@@ -61,9 +66,11 @@ check(vault);
 
 console.log('\nChoose the password your team will share.');
 console.log('The sealed file is public, so anyone can try guesses offline. A few random words work best.\n');
-const passphrase = await askHidden('Shared password: ');
+const asker = createAsker();
+const passphrase = await asker.ask('Shared password: ');
 if (passphrase.length < MIN_LENGTH) fail(`Use at least ${MIN_LENGTH} characters.`);
-const confirmation = await askHidden('Type it again:   ');
+const confirmation = await asker.ask('Type it again:   ');
+asker.close();
 if (passphrase !== confirmation) fail('Those did not match. Nothing was changed.');
 
 const salt = crypto.getRandomValues(new Uint8Array(16));
