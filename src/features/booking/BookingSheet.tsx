@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { addMinutes, format, isSameDay, parse, startOfDay } from 'date-fns';
+import { addMinutes, format, isSameDay, startOfDay } from 'date-fns';
 import { ConflictError, findConflicts, nextFreeStart, validateSlot } from '../../lib/conflicts';
-import { fmtDay, fmtMinutes, fmtRange, fmtTime, minutesIntoDay, toLocal } from '../../lib/time';
+import { fmtDay, fmtMinutes, fmtRange, fmtZoned, localZone, minutesIntoDay, timeZoneName, wallClock, zonedDate, zoneOptions } from '../../lib/time';
 import { PURPOSES, type Account, type Booking, type Purpose, type Slot } from '../../lib/types';
 import { Icon } from '../../components/Icon';
 
@@ -57,6 +57,7 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
   const [dateText, setDateText] = useState(format(prefill.day ?? now, 'yyyy-MM-dd'));
   const [fromMin, setFromMin] = useState(prefill.fromMin ?? defaultStart);
   const [toMin, setToMin] = useState(prefill.toMin ?? Math.min(defaultStart + 60, 1440));
+  const [zone, setZone] = useState(localZone);
   const [purpose, setPurpose] = useState<Purpose>('Demo');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
@@ -66,6 +67,8 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
   const [added, setAdded] = useState<string[]>([]);
 
   const person = (choice === CUSTOM ? custom : choice).trim();
+  const zones = useMemo(zoneOptions, []);
+  const sameZoneDay = (a: Date, b: Date) => wallClock(a, zone).dateText === wallClock(b, zone).dateText;
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
@@ -78,9 +81,8 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
       const start = new Date(Math.floor(now.getTime() / 60_000) * 60_000);
       return { start, end: addMinutes(start, duration) };
     }
-    const day = parse(dateText, 'yyyy-MM-dd', new Date());
-    return { start: toLocal(day, fromMin), end: toLocal(day, toMin) };
-  }, [mode, now, duration, dateText, fromMin, toMin]);
+    return { start: zonedDate(dateText, fromMin, zone), end: zonedDate(dateText, toMin, zone) };
+  }, [mode, now, duration, dateText, fromMin, toMin, zone]);
 
   const slot: Slot = { accountId, ...range };
   const lengthMs = range.end.getTime() - range.start.getTime();
@@ -90,21 +92,22 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
   const otherFree = other && !timeError && findConflicts({ ...range, accountId: other.id }, bookings).length === 0;
   const laterStart = conflicts.length ? nextFreeStart(accountId, range.start, lengthMs, bookings) : null;
   const laterEnd = laterStart ? new Date(laterStart.getTime() + lengthMs) : null;
-  const canSlide = laterStart !== null && laterEnd !== null && isSameDay(laterStart, laterEnd);
+  const canSlide = laterStart !== null && laterEnd !== null && sameZoneDay(laterStart, laterEnd);
   const blocker = conflicts[0] ? new Date(conflicts[0].start) : null;
   const canShorten = blocker !== null && blocker.getTime() - range.start.getTime() >= 15 * 60_000;
 
   function shortenTo(end: Date) {
     setJustTaken(false);
     if (mode === 'now') setDuration(Math.floor((end.getTime() - range.start.getTime()) / 60_000));
-    else setToMin(minutesIntoDay(end));
+    else setToMin(wallClock(end, zone).minutes);
   }
 
   function moveTo(start: Date, end: Date) {
     setMode('later');
-    setDateText(format(start, 'yyyy-MM-dd'));
-    setFromMin(minutesIntoDay(start));
-    setToMin(minutesIntoDay(end));
+    const from = wallClock(start, zone);
+    setDateText(from.dateText);
+    setFromMin(from.minutes);
+    setToMin(wallClock(end, zone).minutes);
     setJustTaken(false);
   }
 
@@ -126,6 +129,7 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
         note: note.trim() || undefined,
         start: range.start.toISOString(),
         end: range.end.toISOString(),
+        timeZone: mode === 'now' ? localZone() : zone,
         createdAt: new Date().toISOString(),
       });
       if (another) {
@@ -134,7 +138,7 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
         setNote('');
         const nextEnd = new Date(range.end.getTime() + lengthMs);
         setMode('later');
-        if (isSameDay(range.end, nextEnd)) moveTo(range.end, nextEnd);
+        if (sameZoneDay(range.end, nextEnd)) moveTo(range.end, nextEnd);
       } else {
         setDone(true);
         setTimeout(onClose, 1100);
@@ -236,6 +240,15 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
                     </select>
                   </label>
                 </div>
+                <label className="mini">
+                  <span>Time zone</span>
+                  <select className="input" value={zone} onChange={(event) => setZone(event.target.value)}>
+                    {zones.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+                  </select>
+                </label>
+                {zone !== localZone() && !timeError && (
+                  <p className="zone-note">That's {fmtDay(range.start)}, {fmtRange(range.start, range.end)} your time ({timeZoneName()})</p>
+                )}
                 <div className="chips" role="group" aria-label="Set length">
                   {DURATIONS.map((minutes) => (
                     <button key={minutes} className="choice" aria-pressed={toMin - fromMin === minutes} onClick={() => setLength(minutes)}>{label(minutes)}</button>
@@ -284,9 +297,9 @@ export function BookingSheet({ prefill, people, accounts, tones, bookings, now, 
                   ))}
                   <div className="conflict-fixes">
                     {otherFree && other && <button className="btn ghost small" onClick={() => setAccountId(other.id)}>Use {other.label} instead</button>}
-                    {canShorten && blocker && <button className="btn ghost small" onClick={() => shortenTo(blocker)}>End at {fmtTime(blocker)} instead</button>}
+                    {canShorten && blocker && <button className="btn ghost small" onClick={() => shortenTo(blocker)}>End at {fmtZoned(blocker, zone)} instead</button>}
                     {canSlide && laterStart && laterEnd ? (
-                      <button className="btn ghost small" onClick={() => moveTo(laterStart, laterEnd)}>Move to {fmtTime(laterStart)}{isSameDay(laterStart, range.start) ? '' : `, ${fmtDay(laterStart)}`}</button>
+                      <button className="btn ghost small" onClick={() => moveTo(laterStart, laterEnd)}>Move to {fmtZoned(laterStart, zone)}{isSameDay(laterStart, range.start) ? '' : `, ${fmtDay(laterStart)}`}</button>
                     ) : null}
                   </div>
                 </div>

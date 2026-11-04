@@ -133,7 +133,7 @@ select.input option { background: var(--ink-800); color: var(--cream); }
   padding: 14px max(16px, calc((100vw - 1320px) / 2)); backdrop-filter: blur(18px);
   background: rgba(11, 18, 40, 0.62); border-bottom: 1px solid var(--line);
 }
-.brand { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.brand { display: flex; align-items: center; white-space: nowrap; gap: 10px; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
 .brand-mark { display: flex; gap: 3px; }
 .brand-mark i { display: block; width: 8px; height: 22px; border-radius: 4px; background: var(--orange); }
 .brand-mark i:last-child { background: var(--peri); animation: seat-bob 3.4s ease-in-out infinite; }
@@ -210,6 +210,7 @@ select.input option { background: var(--ink-800); color: var(--cream); }
 .kick-warning { overflow: hidden; }
 .kick-warning > div { padding: 13px 14px; border-radius: 14px; background: rgba(255, 69, 26, 0.13); border: 1px solid rgba(255, 69, 26, 0.5); }
 .kick-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.login-hint { color: var(--mist); font-size: 13px; text-align: center; }
 .field {
   display: flex; align-items: center; gap: 4px; min-height: 50px; padding: 4px 6px 4px 14px; border-radius: 13px;
   background: rgba(11, 18, 40, 0.5); border: 1px solid var(--line); transition: border-color 0.2s, box-shadow 0.2s;
@@ -347,6 +348,7 @@ select.input option { background: var(--ink-800); color: var(--cream); }
 .details h3 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
 .details-what { font-size: 16px; font-weight: 600; margin-top: 4px; overflow-wrap: anywhere; }
 .details-when { color: var(--mist); }
+.zone-note { color: var(--amber); font-size: 13.5px; font-weight: 600; }
 .details-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .details .close { position: absolute; top: 12px; right: 12px; }
 

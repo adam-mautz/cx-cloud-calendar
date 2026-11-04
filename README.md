@@ -1,4 +1,4 @@
-# Hot Seat
+# CX Cloud Calendar
 
 A small booking board for two shared logins that can't be used at the same time. See who's on each one, claim it, and schedule time ahead.
 

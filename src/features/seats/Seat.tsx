@@ -1,6 +1,7 @@
 import { useState, type PointerEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { currentBooking, nextBooking } from '../../lib/conflicts';
+import { loginLink } from '../../lib/login';
 import { fmtDay, fmtLeft, fmtTime } from '../../lib/time';
 import type { Account, Booking } from '../../lib/types';
 import { Icon } from '../../components/Icon';
@@ -18,6 +19,7 @@ interface Props {
   onClaim: (accountId: string) => void;
   onExtend: (booking: Booking) => void;
   onEnd: (booking: Booking) => void;
+  onLogin: (passwordCopied: boolean) => void;
 }
 
 const swap = {
@@ -27,7 +29,7 @@ const swap = {
   transition: { duration: 0.28 },
 };
 
-export function Seat({ account, tone, bookings, now, me, loaded, failed, onClaim, onExtend, onEnd }: Props) {
+export function Seat({ account, tone, bookings, now, me, loaded, failed, onClaim, onExtend, onEnd, onLogin }: Props) {
   const [warning, setWarning] = useState(false);
   const active = currentBooking(account.id, now, bookings);
   const upcoming = nextBooking(account.id, now, bookings);
@@ -39,9 +41,15 @@ export function Seat({ account, tone, bookings, now, me, loaded, failed, onClaim
     event.currentTarget.style.setProperty('--my', `${event.clientY - box.top}px`);
   }
 
-  function openLogin() {
+  async function openLogin() {
     setWarning(false);
-    window.open(account.loginUrl, '_blank', 'noopener,noreferrer');
+    // Copy first: the browser refuses clipboard writes once the new tab has focus.
+    const copied = await navigator.clipboard.writeText(account.password).then(
+      () => true,
+      () => false,
+    );
+    window.open(loginLink(account), '_blank', 'noopener,noreferrer');
+    onLogin(copied);
   }
 
   const total = active ? Date.parse(active.end) - Date.parse(active.start) : 1;
@@ -136,6 +144,7 @@ export function Seat({ account, tone, bookings, now, me, loaded, failed, onClaim
         <button className="btn login wide" onClick={() => (heldByOther ? setWarning(true) : openLogin())}>
           Log in as {account.label} <Icon name="out" size={17} />
         </button>
+        <p className="login-hint">Fills in the username and copies the password for you to paste.</p>
         <CopyField label="Username" value={account.username} />
         <CopyField label="Password" value={account.password} secret />
       </div>

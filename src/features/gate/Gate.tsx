@@ -43,7 +43,7 @@ export function Gate({ envelope, onOpen, onSample }: Props) {
           <div className="gate-mark">
             <Icon name="lock" size={22} />
           </div>
-          <h1>Hot Seat</h1>
+          <h1>CX Cloud Calendar</h1>
           {envelope ? (
             <>
               <p>Enter the team password to continue.</p>
@@ -69,14 +69,10 @@ export function Gate({ envelope, onOpen, onSample }: Props) {
                 {busy ? <span className="spinner" /> : 'Unlock'}
               </button>
             </>
-          ) : onSample ? (
-            <>
-              <p>No sealed vault found. Sample data is available in local development.</p>
-              <button type="button" className="btn primary wide" onClick={onSample}>Open with sample data</button>
-            </>
           ) : (
             <p>This board hasn't been set up yet.</p>
           )}
+          {onSample && <button type="button" className="btn ghost wide" onClick={onSample}>Open with sample data</button>}
         </motion.form>
       </motion.div>
     </motion.main>

@@ -126,7 +126,7 @@ export function Board({ vault, store, onLock }: Props) {
       <header className="topbar" inert={overlayOpen}>
         <div className="brand">
           <span className="brand-mark" aria-hidden="true"><i /><i /></span>
-          Hot Seat
+          CX Cloud Calendar
         </div>
         <div className="topbar-right">
           <span className={`sync ${sync}`} title="Updates every 20 seconds"><i />{SYNC_TEXT[sync]}</span>
@@ -164,6 +164,9 @@ export function Board({ vault, store, onLock }: Props) {
               onClaim={(accountId) => setPrefill({ accountId, now: true })}
               onExtend={extend}
               onEnd={setDetails}
+              onLogin={(copied) =>
+                copied ? push('Password copied. Paste it on the login page.') : push("Couldn't copy the password. Use the copy button.", 'error')
+              }
             />
           ))}
         </div>

@@ -32,6 +32,8 @@ export interface Booking {
   /** ISO 8601 in UTC. Shown in each viewer's own time zone. */
   start: string;
   end: string;
+  /** The IANA zone the booking was made in. Older bookings don't have one. */
+  timeZone?: string;
   createdAt: string;
 }
 

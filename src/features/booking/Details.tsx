@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { fmtDay, fmtRange } from '../../lib/time';
+import { fmtDay, fmtRange, fmtZoned, localZone, zoneAbbreviation } from '../../lib/time';
 import type { Account, Booking } from '../../lib/types';
 import { Icon } from '../../components/Icon';
 
@@ -44,6 +44,11 @@ export function Details({ booking, account, tone, now, onClose, onRemove }: Prop
         <h3>{booking.person}</h3>
         <p className="details-what">{booking.purpose}{booking.note ? ` · ${booking.note}` : ''}</p>
         <p className="details-when">{fmtDay(start)}, {fmtRange(start, end)}</p>
+        {booking.timeZone && booking.timeZone !== localZone() && (
+          <p className="details-when">
+            Booked as {fmtZoned(start, booking.timeZone)} – {fmtZoned(end, booking.timeZone)} {zoneAbbreviation(booking.timeZone, start)}
+          </p>
+        )}
         {!finished && (
           confirming ? (
             <div className="details-actions">

@@ -22,7 +22,7 @@ function seed(): Booking[] {
   return [
     make('m1', 'user-1', 'Casey', 'Demo', addMinutes(now, -50), addMinutes(now, 70), 'Northwind discovery'),
     make('m2', 'user-1', 'Blair', 'Testing', addMinutes(now, 95), addMinutes(now, 200)),
-    make('m3', 'user-2', 'Emery', 'Demo', at(1, 13), at(1, 15), 'Contoso exec review'),
+    { ...make('m3', 'user-2', 'Emery', 'Demo', at(1, 13), at(1, 15), 'Contoso exec review'), timeZone: 'America/New_York' },
     make('m4', 'user-1', 'Alex', 'Demo', at(1, 9), at(1, 10, 30), 'Fabrikam'),
     make('m5', 'user-2', 'Finley', 'Build', at(2, 10), at(2, 16)),
     make('m6', 'user-1', 'Harper', 'Training', at(3, 14), at(3, 16)),
